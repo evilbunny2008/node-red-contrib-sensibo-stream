@@ -4,7 +4,7 @@
   "description": "Node-RED nodes for the Sensibo API v2 real-time Event Stream (Server-Sent Events)",
   "main": "nodes/sensibo-stream.js",
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
     "release": "npm version ${BUMP:-patch} && git push --follow-tags && gh release create v$(node -p \"require('./package.json').version\") --generate-notes"
   },
   "keywords": [
