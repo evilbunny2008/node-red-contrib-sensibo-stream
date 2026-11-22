@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sensibo-stream",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Node-RED nodes for the Sensibo API v2 real-time Event Stream (Server-Sent Events)",
   "main": "nodes/sensibo-stream.js",
   "scripts": {
