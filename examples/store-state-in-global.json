@@ -1,0 +1,114 @@
+[
+ {
+  "id": "gs_tab",
+  "type": "tab",
+  "label": "Sensibo: store state in global"
+ },
+ {
+  "id": "gs_cfg",
+  "type": "sensibo-stream-account",
+  "name": "My Sensibo",
+  "pollMinutes": 15,
+  "fetchOnChange": true,
+  "lookupCause": true
+ },
+ {
+  "id": "gs_stream",
+  "type": "sensibo-event-stream",
+  "z": "gs_tab",
+  "name": "",
+  "account": "gs_cfg",
+  "devices": "",
+  "evHello": false,
+  "evMeasurements": true,
+  "evChanged": false,
+  "evResync": false,
+  "evDevice": true,
+  "evPoll": true,
+  "includeDevice": false,
+  "x": 150,
+  "y": 80,
+  "wires": [
+   [
+    "gs_store"
+   ]
+  ]
+ },
+ {
+  "id": "gs_store",
+  "type": "function",
+  "z": "gs_tab",
+  "name": "store in global.sensibo",
+  "func": "// Keeps global \"sensibo\" up to date:\n//   sensibo.<deviceId> and sensibo[\"<room name>\"]\n//     -> { id, name, acState, measurements, connected, lastChange, updated }\nconst all = global.get('sensibo') || {};\nconst id = msg.deviceId;\nif (!id) return null;\n\nconst entry = all[id] || { id };\n\nif (msg.event === 'device' || msg.event === 'poll') {\n    const d = msg.payload;                         // full device from Sensibo\n    entry.name = d.room ? d.room.name : entry.name;\n    if (d.acState) entry.acState = d.acState;\n    if (d.measurements) entry.measurements = Object.assign({}, entry.measurements, d.measurements);\n    if (d.connectionStatus) entry.connected = d.connectionStatus.isAlive;\n\n    if (msg.change) {                              // what caused this AC change\n        const c = msg.change;\n        entry.lastChange = {\n            reason: msg.cause,\n            causedBy: c.causedByUser ? (c.causedByUser.firstName || c.causedByUser.username) : null,\n            changed: c.changedProperties,\n            status: c.status,\n            time: c.time ? c.time.time : new Date().toISOString()\n        };\n        node.status({ text: `${entry.name || id}: ${msg.cause || '?'}` });\n    }\n} else if (msg.event === 'measurements') {\n    entry.measurements = Object.assign({}, entry.measurements, msg.payload.measurements);\n} else {\n    return null;\n}\n\nentry.updated = new Date().toISOString();\nall[id] = entry;\nif (entry.name) all[entry.name] = entry;           // also reachable by room name\nglobal.set('sensibo', all);\nreturn null;\n",
+  "outputs": 0,
+  "timeout": 0,
+  "noerr": 0,
+  "initialize": "",
+  "finalize": "",
+  "libs": [],
+  "x": 390,
+  "y": 80,
+  "wires": []
+ },
+ {
+  "id": "gs_comment",
+  "type": "comment",
+  "z": "gs_tab",
+  "name": "Read with: global sensibo[\"<room name>\"].acState  (or .measurements / .lastChange.reason)",
+  "info": "",
+  "x": 330,
+  "y": 40,
+  "wires": []
+ },
+ {
+  "id": "gs_inject",
+  "type": "inject",
+  "z": "gs_tab",
+  "name": "read state",
+  "props": [],
+  "repeat": "",
+  "once": false,
+  "x": 140,
+  "y": 160,
+  "wires": [
+   [
+    "gs_read"
+   ]
+  ]
+ },
+ {
+  "id": "gs_read",
+  "type": "change",
+  "z": "gs_tab",
+  "name": "all devices",
+  "rules": [
+   {
+    "t": "set",
+    "p": "payload",
+    "pt": "msg",
+    "to": "sensibo",
+    "tot": "global"
+   }
+  ],
+  "x": 320,
+  "y": 160,
+  "wires": [
+   [
+    "gs_debug"
+   ]
+  ]
+ },
+ {
+  "id": "gs_debug",
+  "type": "debug",
+  "z": "gs_tab",
+  "name": "state",
+  "active": true,
+  "tosidebar": true,
+  "complete": "payload",
+  "targetType": "msg",
+  "x": 490,
+  "y": 160,
+  "wires": []
+ }
+]
