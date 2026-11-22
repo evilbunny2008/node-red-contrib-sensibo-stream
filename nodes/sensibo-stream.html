@@ -1,0 +1,106 @@
+<script type="text/javascript">
+    RED.nodes.registerType('sensibo-event-stream', {
+        category: 'home automation',
+        color: '#5ac8a8',
+        defaults: {
+            name: { value: '' },
+            account: { value: '', type: 'sensibo-stream-account', required: true },
+            devices: { value: '' },
+            evHello: { value: true },
+            evMeasurements: { value: true },
+            evChanged: { value: true },
+            evResync: { value: false },
+            evDevice: { value: true },
+            evPoll: { value: true },
+            includeDevice: { value: true }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: 'bridge.svg',
+        inputLabels: 'refresh / reconnect',
+        outputLabels: 'events',
+        label: function () {
+            return this.name || 'sensibo stream';
+        },
+        paletteLabel: 'sensibo stream'
+    });
+</script>
+
+<script type="text/html" data-template-name="sensibo-event-stream">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="sensibo stream">
+    </div>
+    <div class="form-row">
+        <label for="node-input-account"><i class="fa fa-user"></i> Account</label>
+        <input type="text" id="node-input-account">
+    </div>
+    <div class="form-row">
+        <label for="node-input-devices"><i class="fa fa-filter"></i> Devices</label>
+        <input type="text" id="node-input-devices" placeholder="all devices (or comma-separated device ids)">
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-list"></i> Output</label>
+        <div style="display:inline-block; width:70%;">
+            <label style="width:auto;"><input type="checkbox" id="node-input-evMeasurements" style="width:auto;"> <code>measurements</code> events</label><br>
+            <label style="width:auto;"><input type="checkbox" id="node-input-evChanged" style="width:auto;"> <code>changed</code> events</label><br>
+            <label style="width:auto;"><input type="checkbox" id="node-input-evDevice" style="width:auto;"> <code>device</code> &ndash; full state after a change</label><br>
+            <label style="width:auto;"><input type="checkbox" id="node-input-evPoll" style="width:auto;"> <code>poll</code> &ndash; full state at start-up and every slow poll</label><br>
+            <label style="width:auto;"><input type="checkbox" id="node-input-evHello" style="width:auto;"> <code>hello</code> events</label><br>
+            <label style="width:auto;"><input type="checkbox" id="node-input-evResync" style="width:auto;"> <code>resync</code> events</label>
+        </div>
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <label style="width:auto;"><input type="checkbox" id="node-input-includeDevice" style="width:auto;"> Attach cached device state as <code>msg.device</code></label>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="sensibo-event-stream">
+    <p>Receives real-time events from the Sensibo API v2
+       <a href="https://support.sensibo.com/api/#event-stream" target="_blank">Event Stream</a>
+       (<code>GET /stream</code>, Server-Sent Events).</p>
+    <p>The connection is shared by all nodes using the same account, and follows Sensibo's client rules:
+       backoff with jitter up to 5 minutes, <code>Retry-After</code> on 429/503, reconnect after two
+       missed heartbeats, reopen on <code>resync</code>, and a 15+ minute slow poll.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string</span></dt>
+        <dd><code>"reconnect"</code> closes and reopens the stream. Anything else re-reads all devices
+            and emits <code>poll</code> messages (if enabled).</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>event <span class="property-type">string</span></dt>
+        <dd><code>measurements</code>, <code>changed</code>, <code>device</code>, <code>poll</code>,
+            <code>hello</code> or <code>resync</code>.</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd><code>sensibo/&lt;event&gt;/&lt;deviceId&gt;</code></dd>
+        <dt>deviceId <span class="property-type">string</span></dt>
+        <dd>The device (or sensor) id.</dd>
+        <dt class="optional">podId <span class="property-type">string</span></dt>
+        <dd>For room/window sensor measurements: the device the sensor belongs to.</dd>
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>For stream events, the event's JSON data, e.g.
+            <code>{"id":"AbCd1234","measurements":{"temperature":23.4,...}}</code>.
+            For <code>device</code> / <code>poll</code>, the full device object from
+            <code>/pods/{id}</code>.</dd>
+        <dt class="optional">reason <span class="property-type">string</span></dt>
+        <dd>For <code>poll</code>: why the state was loaded &ndash; <code>hello</code> (stream opened),
+            <code>startup</code> (stream unavailable at start-up), <code>cached</code> (node redeployed
+            while the connection was open), <code>poll</code> (slow poll) or <code>refresh</code> (input).</dd>
+        <dt class="optional">fields <span class="property-type">array</span></dt>
+        <dd>For <code>changed</code> / <code>device</code>: what changed, e.g. <code>["acState"]</code>.
+            Empty means anything may have changed.</dd>
+        <dt class="optional">device <span class="property-type">object</span></dt>
+        <dd>The cached device state, with stream measurements merged in.</dd>
+    </dl>
+
+    <h3>Details</h3>
+    <p>Use a <i>switch</i> node on <code>msg.event</code> to route event types.
+       A typical flow listens to <code>measurements</code> for temperature/humidity and
+       <code>device</code> for AC state (<code>msg.payload.acState</code>).</p>
+    <p>Commands (AC state, timers, schedules, Climate React) still go through the REST API.</p>
+</script>

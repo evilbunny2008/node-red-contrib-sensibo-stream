@@ -1,0 +1,35 @@
+{
+  "name": "node-red-contrib-sensibo-stream",
+  "version": "0.0.5",
+  "description": "Node-RED nodes for the Sensibo API v2 real-time Event Stream (Server-Sent Events)",
+  "main": "nodes/sensibo-stream.js",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "node-red",
+    "sensibo",
+    "air conditioner",
+    "sse",
+    "event stream",
+    "home automation"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "lib",
+    "nodes",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
+  "node-red": {
+    "version": ">=3.0.0",
+    "nodes": {
+      "sensibo-stream-account": "nodes/sensibo-config.js",
+      "sensibo-event-stream": "nodes/sensibo-stream.js"
+    }
+  }
+}

@@ -1,0 +1,53 @@
+<script type="text/javascript">
+    RED.nodes.registerType('sensibo-stream-account', {
+        category: 'config',
+        defaults: {
+            name: { value: '' },
+            pollMinutes: { value: 15, required: true, validate: function (v) { return parseInt(v, 10) >= 15; } },
+            fetchOnChange: { value: true }
+        },
+        credentials: {
+            apiKey: { type: 'password' }
+        },
+        label: function () {
+            return this.name || 'Sensibo account';
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="sensibo-stream-account">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" placeholder="Sensibo account">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-apiKey"><i class="fa fa-key"></i> API key</label>
+        <input type="password" id="node-config-input-apiKey">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-pollMinutes"><i class="fa fa-clock-o"></i> Slow poll</label>
+        <input type="number" id="node-config-input-pollMinutes" min="15" style="width: 80px"> minutes (min 15)
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-fetchOnChange">&nbsp;</label>
+        <input type="checkbox" id="node-config-input-fetchOnChange" style="display:inline-block; width:auto; vertical-align:top;">
+        <label for="node-config-input-fetchOnChange" style="width:auto;">Re-read device on <code>changed</code> events</label>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="sensibo-stream-account">
+    <p>A Sensibo account. All stream nodes that use the same account share a
+       single <code>GET /stream</code> connection (Sensibo allows at most 10 open streams per account).</p>
+    <h3>Properties</h3>
+    <dl class="message-properties">
+        <dt>API key <span class="property-type">string</span></dt>
+        <dd>Create one at <a href="https://home.sensibo.com/me/api" target="_blank">home.sensibo.com/me/api</a>.
+            The same key works for the stream and for the REST API used for device state.</dd>
+        <dt>Slow poll <span class="property-type">minutes</span></dt>
+        <dd>How often all devices are re-read, because not every field produces a stream event.
+            Sensibo asks for 15 minutes or more. Polling continues at this rate while the stream is unavailable.</dd>
+        <dt>Re-read device on changed</dt>
+        <dd>When a <code>changed</code> event arrives, fetch <code>/pods/{id}</code> and emit a
+            <code>device</code> message with the full new state.</dd>
+    </dl>
+</script>

@@ -1,0 +1,11 @@
+[
+  {"id":"ex_tab","type":"tab","label":"Sensibo stream example"},
+  {"id":"ex_cfg","type":"sensibo-stream-account","name":"My Sensibo","pollMinutes":15,"fetchOnChange":true},
+  {"id":"ex_inject","type":"inject","z":"ex_tab","name":"refresh all","props":[{"p":"payload"}],"payload":"refresh","payloadType":"str","x":130,"y":80,"wires":[["ex_stream"]]},
+  {"id":"ex_stream","type":"sensibo-event-stream","z":"ex_tab","name":"","account":"ex_cfg","devices":"","evHello":false,"evMeasurements":true,"evChanged":false,"evResync":false,"evDevice":true,"evPoll":true,"includeDevice":true,"x":320,"y":80,"wires":[["ex_switch"]]},
+  {"id":"ex_switch","type":"switch","z":"ex_tab","name":"by event","property":"event","propertyType":"msg","rules":[{"t":"eq","v":"measurements","vt":"str"},{"t":"eq","v":"device","vt":"str"},{"t":"eq","v":"poll","vt":"str"}],"checkall":"true","repair":false,"outputs":3,"x":500,"y":80,"wires":[["ex_temp"],["ex_ac"],["ex_ac"]]},
+  {"id":"ex_temp","type":"change","z":"ex_tab","name":"temperature","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.measurements.temperature","tot":"msg"}],"x":690,"y":40,"wires":[["ex_dbg1"]]},
+  {"id":"ex_ac","type":"change","z":"ex_tab","name":"acState","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.acState","tot":"msg"}],"x":680,"y":120,"wires":[["ex_dbg2"]]},
+  {"id":"ex_dbg1","type":"debug","z":"ex_tab","name":"temperature","active":true,"tosidebar":true,"complete":"false","x":880,"y":40,"wires":[]},
+  {"id":"ex_dbg2","type":"debug","z":"ex_tab","name":"AC state","active":true,"tosidebar":true,"complete":"false","x":870,"y":120,"wires":[]}
+]
