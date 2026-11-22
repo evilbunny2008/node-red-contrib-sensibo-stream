@@ -5,6 +5,7 @@
   "main": "nodes/sensibo-stream.js",
   "scripts": {
     "test": "node --test test/*.test.js"
+    "release": "npm version ${BUMP:-patch} && git push --follow-tags && gh release create v$(node -p \"require('./package.json').version\") --generate-notes"
   },
   "keywords": [
     "node-red",
@@ -14,7 +15,7 @@
     "event stream",
     "home automation"
   ],
-  "license": "MIT",
+  "license": "Unlicense",
   "engines": {
     "node": ">=18"
   },
