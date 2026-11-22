@@ -26,17 +26,33 @@ It works alongside [node-red-contrib-sensibo](https://flows.nodered.org/node/nod
 
 ## Install
 
-In Node-RED: *Menu → Manage palette → Install*, search for `node-red-contrib-sensibo-stream`.
+[![Node-RED flow library](https://img.shields.io/badge/Node--RED-flow%20library-8f0000)](https://flows.nodered.org/node/node-red-contrib-sensibo-stream)
+[![npm](https://img.shields.io/npm/v/node-red-contrib-sensibo-stream)](https://www.npmjs.com/package/node-red-contrib-sensibo-stream)
 
-Or from your Node-RED user directory (often `~/.node-red`, check *Settings file* / *User directory*
-in the Node-RED start-up log), as the user Node-RED runs as:
+The package is in the [Node-RED flow library](https://flows.nodered.org/node/node-red-contrib-sensibo-stream),
+so the easiest way is the palette manager:
+
+1. In the Node-RED editor open *Menu → Manage palette → Install*.
+2. Search for `sensibo-stream` and click *install* next to **node-red-contrib-sensibo-stream**.
+3. Reload the editor (Ctrl+Shift+R). The **sensibo stream** node appears under *home automation*.
+
+Updates show up in the same place: *Manage palette → Nodes* offers an *update* button when a new
+version is out. After updating, restart Node-RED if prompted, then reload the editor.
+
+### From the command line
+
+From your Node-RED user directory (often `~/.node-red`, check *User directory* in the Node-RED
+start-up log), as the user Node-RED runs as:
 
 ```sh
 npm install node-red-contrib-sensibo-stream
 ```
 
-Then restart Node-RED **and reload the editor in the browser** (Ctrl+Shift+R) — see
-[Troubleshooting](#troubleshooting) for why the reload matters after every upgrade.
+Then restart Node-RED **and reload the editor in the browser** (Ctrl+Shift+R).
+
+> **Always reload the editor after installing or upgrading.** The editor loads node definitions
+> only when the page loads, so a tab opened before the upgrade shows the old options and drops
+> new settings when you deploy. See [Troubleshooting](#troubleshooting).
 
 ## Quick start
 

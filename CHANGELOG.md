@@ -3,6 +3,7 @@
 ## Unreleased
 - Documentation: full README (output reference, cause lookup, recipes, troubleshooting),
   richer in-editor help, new *store-state-in-global* example flow.
+- README: install from the Node-RED palette manager (now in the flow library).
 
 ## 0.0.11
 - New account option **Look up what caused AC state changes**: `device` messages after an AC
