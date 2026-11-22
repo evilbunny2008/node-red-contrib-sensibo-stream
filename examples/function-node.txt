@@ -1,0 +1,43 @@
+// Keeps global "sensibo" up to date:
+//   sensibo.<deviceId> and sensibo["<room name>"]
+//     -> { id, name, acState, measurements, connected, lastChange, updated }
+//
+// Stream node: tick device, poll and measurements.
+// Account node: tick "Look up what caused AC state changes" to fill lastChange.
+const all = global.get('sensibo') || {};
+const id = msg.deviceId;
+if (!id) return null;
+
+const entry = all[id] || { id };
+
+if (msg.event === 'device' || msg.event === 'poll') {
+    const d = msg.payload;                         // full device from Sensibo
+    entry.name = d.room ? d.room.name : entry.name;
+    if (d.acState) entry.acState = d.acState;
+    if (d.measurements) entry.measurements = Object.assign({}, entry.measurements, d.measurements);
+    if (d.connectionStatus) entry.connected = d.connectionStatus.isAlive;
+
+    if (msg.change) {                              // what caused this AC change
+        const c = msg.change;
+        entry.lastChange = {
+            reason: msg.cause,                     // UserRequest / ExternalIrCommand / Trigger / ScheduledCommand ...
+            causedBy: c.causedByUser ? (c.causedByUser.firstName || c.causedByUser.username) : null,
+            changed: c.changedProperties,
+            status: c.status,
+            time: c.time ? c.time.time : new Date().toISOString()
+        };
+        node.status({ text: `${entry.name || id}: ${msg.cause || '?'}` });
+    }
+
+} else if (msg.event === 'measurements') {
+    entry.measurements = Object.assign({}, entry.measurements, msg.payload.measurements);
+
+} else {
+    return null;
+}
+
+entry.updated = new Date().toISOString();
+all[id] = entry;
+if (entry.name) all[entry.name] = entry;           // also reachable by room name
+global.set('sensibo', all);
+return null;
