@@ -16,6 +16,14 @@
     "home automation"
   ],
   "license": "Unlicense",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evilbunny2008/node-red-contrib-sensibo-stream.git"
+  },
+  "bugs": {
+    "url": "https://github.com/evilbunny2008/node-red-contrib-sensibo-stream/issues"
+  },
+  "homepage": "https://github.com/evilbunny2008/node-red-contrib-sensibo-stream#readme",
   "engines": {
     "node": ">=18"
   },
