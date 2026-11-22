@@ -91,6 +91,11 @@
         <dd>For <code>poll</code>: why the state was loaded &ndash; <code>hello</code> (stream opened),
             <code>startup</code> (stream unavailable at start-up), <code>cached</code> (node redeployed
             while the connection was open), <code>poll</code> (slow poll) or <code>refresh</code> (input).</dd>
+        <dt class="optional">cause <span class="property-type">string</span></dt>
+        <dd>For <code>device</code>, when &ldquo;Look up what caused AC state changes&rdquo; is enabled on the
+            account: what changed the AC, e.g. <code>UserRequest</code> (app/API),
+            <code>ExternalIrCommand</code> (remote), <code>Trigger</code> (Climate React),
+            <code>ScheduledCommand</code>. <code>msg.change</code> holds the full history entry.</dd>
         <dt class="optional">fields <span class="property-type">array</span></dt>
         <dd>For <code>changed</code> / <code>device</code>: what changed, e.g. <code>["acState"]</code>.
             Empty means anything may have changed.</dd>

@@ -66,18 +66,23 @@ module.exports = function (RED) {
             node.send(msg);
         }
 
-        function onDevice({ id, device, reason, fields }) {
+        function onDevice({ id, device, reason, fields, change }) {
             const kind = reason === 'changed' ? 'device' : 'poll';
             if (!wanted[kind]) return;
             if (!matches(id)) return;
-            node.send({
+            const msg = {
                 topic: 'sensibo/' + kind + '/' + id,
                 event: kind,
                 reason,
                 deviceId: id,
                 fields: fields || [],
                 payload: RED.util.cloneMessage(device)
-            });
+            };
+            if (change) {
+                msg.change = RED.util.cloneMessage(change);
+                if (change.reason) msg.cause = change.reason;
+            }
+            node.send(msg);
         }
 
         account.on('status', onStatus);

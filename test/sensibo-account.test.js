@@ -37,6 +37,12 @@ function api(req, res, state) {
         res.setHeader('Content-Type', 'application/json');
         return res.end(JSON.stringify({ status: 'success', result: [POD] }));
     }
+    if (url.pathname === '/api/v2/pods/AbCd1234/acStates') {
+        state.acStatesCalls = (state.acStatesCalls || 0) + 1;
+        state.acStatesGzip = /gzip/.test(req.headers['accept-encoding'] || '');
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({ status: 'success', result: [{ id: 'x1', reason: 'ExternalIrCommand', status: 'Success', acState: { on: true } }] }));
+    }
     if (url.pathname === '/api/v2/pods/AbCd1234') {
         state.podCalls = (state.podCalls || 0) + 1;
         res.setHeader('Content-Type', 'application/json');
@@ -181,6 +187,41 @@ test('stream unavailable at start-up still loads devices once over REST', async 
         assert.strictEqual(acct.loaded, true);
         assert.deepStrictEqual(acct.getLoadedDevices().map((x) => x.id), ['AbCd1234']);
         assert.strictEqual(state.podsCalls, 1);
+    } finally {
+        acct.stop();
+        server.closeAllConnections();
+        server.close();
+    }
+});
+
+test('lookupCause adds the latest acStates entry to AC changes, with gzip', async () => {
+    const state = {};
+    let streamRes;
+    const { server, baseUrl } = await startServer((req, res) => {
+        if (req.url.startsWith('/api/v2/stream')) {
+            res.writeHead(200, { 'Content-Type': 'text/event-stream' });
+            streamRes = res;
+            res.write('event: hello\ndata: {"version":1,"heartbeatSeconds":120,"pods":1}\n\n');
+            return;
+        }
+        if (api(req, res, state) === false) { res.statusCode = 404; res.end(); }
+    });
+    const acct = new SensiboAccount({ apiKey: KEY, baseUrl, lookupCause: true });
+    try {
+        const loaded = once(acct, 'device', (d) => d.reason === 'hello');
+        acct.start();
+        await loaded;
+        const changed = once(acct, 'device', (d) => d.reason === 'changed');
+        streamRes.write('event: changed\ndata: {"id":"AbCd1234","fields":["acState"]}\n\n');
+        const d = await changed;
+        assert.strictEqual(d.change.reason, 'ExternalIrCommand');
+        assert.strictEqual(state.acStatesGzip, true);
+
+        // a non-AC change must not cost an extra call
+        const other = once(acct, 'device', (x) => x.reason === 'changed');
+        streamRes.write('event: changed\ndata: {"id":"AbCd1234","fields":["connectionStatus"]}\n\n');
+        assert.strictEqual((await other).change, undefined);
+        assert.strictEqual(state.acStatesCalls, 1);
     } finally {
         acct.stop();
         server.closeAllConnections();

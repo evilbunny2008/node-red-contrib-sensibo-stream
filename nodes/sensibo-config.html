@@ -4,7 +4,8 @@
         defaults: {
             name: { value: '' },
             pollMinutes: { value: 15, required: true, validate: function (v) { return parseInt(v, 10) >= 15; } },
-            fetchOnChange: { value: true }
+            fetchOnChange: { value: true },
+            lookupCause: { value: false }
         },
         credentials: {
             apiKey: { type: 'password' }
@@ -33,6 +34,11 @@
         <input type="checkbox" id="node-config-input-fetchOnChange" style="display:inline-block; width:auto; vertical-align:top;">
         <label for="node-config-input-fetchOnChange" style="width:auto;">Re-read device on <code>changed</code> events</label>
     </div>
+    <div class="form-row">
+        <label for="node-config-input-lookupCause">&nbsp;</label>
+        <input type="checkbox" id="node-config-input-lookupCause" style="display:inline-block; width:auto; vertical-align:top;">
+        <label for="node-config-input-lookupCause" style="width:auto;">Look up what caused AC state changes</label>
+    </div>
 </script>
 
 <script type="text/html" data-help-name="sensibo-stream-account">
@@ -49,5 +55,11 @@
         <dt>Re-read device on changed</dt>
         <dd>When a <code>changed</code> event arrives, fetch <code>/pods/{id}</code> and emit a
             <code>device</code> message with the full new state.</dd>
+        <dt>Look up what caused AC state changes</dt>
+        <dd>After an AC state change, also read the latest entry of <code>/pods/{id}/acStates</code>
+            and add it to the <code>device</code> message as <code>msg.change</code>, with its
+            <code>reason</code> in <code>msg.cause</code> (e.g. <code>UserRequest</code>,
+            <code>ExternalIrCommand</code>, <code>Trigger</code>, <code>ScheduledCommand</code>).
+            Costs one extra API call per change. Requires &ldquo;Re-read device&rdquo;.</dd>
     </dl>
 </script>

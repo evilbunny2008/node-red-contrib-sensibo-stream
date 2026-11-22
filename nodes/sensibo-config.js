@@ -9,6 +9,7 @@ module.exports = function (RED) {
         node.name = config.name;
         node.pollMinutes = Math.max(15, parseInt(config.pollMinutes, 10) || 15);
         node.fetchOnChange = config.fetchOnChange !== false;
+        node.lookupCause = config.lookupCause === true;
         node.users = new Set();
         node.account = null;
 
@@ -22,7 +23,8 @@ module.exports = function (RED) {
                 // Undocumented override, intended for testing against a mock server.
                 baseUrl: process.env.SENSIBO_BASE_URL || undefined,
                 pollIntervalMs: node.pollMinutes * 60 * 1000,
-                fetchOnChange: node.fetchOnChange
+                fetchOnChange: node.fetchOnChange,
+                lookupCause: node.lookupCause
             });
             node.account.on('warn', (err) => node.warn(err && err.message ? err.message : String(err)));
             return node.account;
