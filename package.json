@@ -32,7 +32,8 @@
     "nodes",
     "examples",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "node-red": {
     "version": ">=3.0.0",

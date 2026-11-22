@@ -104,6 +104,12 @@
     </dl>
 
     <h3>Details</h3>
+    <p><code>measurements</code> messages only contain measurements; AC settings
+       (<code>msg.payload.acState</code>) arrive in <code>device</code> and <code>poll</code> messages.</p>
+    <p>To keep the current state available to other flows, store it in global context &ndash; see the
+       <i>store-state-in-global</i> example (<i>Import &rarr; Examples</i>).</p>
+    <p>After upgrading this package, reload the editor (Ctrl+Shift+R). An editor opened before the
+       upgrade does not show new options and drops them when you deploy.</p>
     <p>Use a <i>switch</i> node on <code>msg.event</code> to route event types.
        A typical flow listens to <code>measurements</code> for temperature/humidity and
        <code>device</code> for AC state (<code>msg.payload.acState</code>).</p>
